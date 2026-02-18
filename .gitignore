@@ -5,6 +5,8 @@ __pycache__
 
 # C extensions
 *.so
+*.dylib
+*.metallib
 
 # macOS dir files
 .DS_Store
@@ -65,10 +67,17 @@ dataset/*
 # cython output
 /audiocraft/metrics/abx/*.c
 
-# rust-analyzer
-Cargo.toml
-Cargo.lock
-target/
+# Rust build artifacts (keep Cargo.toml and Cargo.lock for native/ crates)
+**/target/
+
+# Native build artifacts (auto-compiled .dylib from simd_audio.c and amx_flow_fused.c)
+native/*.o
+native/*.dylib
+native/__pycache__/
+
+# Benchmark generated results (WAVs already caught by *.wav above)
+tests/benchmark/results/
+tests/benchmark/__pycache__/
 
 # nfs files
 .nfs*
@@ -79,6 +88,8 @@ test_en_audio_4000.model
 profile_output*
 *.safetensors
 *.wav
+!tests/fixtures/*.wav
+!tests/fixtures/golden_samples/*.wav
 *.model
 *.pt
 

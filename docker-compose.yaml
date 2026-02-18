@@ -1,5 +1,5 @@
 services:
-  pocket-tts:
+  pocket-voice:
     build: .
     ports:
       - "8000:8000"

@@ -1,11 +1,11 @@
-import torch
-import torch.nn as nn
+import mlx.core as mx
+import mlx.nn as nn
 
 
 class LayerScale(nn.Module):
     def __init__(self, channels: int, init: float):
         super().__init__()
-        self.scale = nn.Parameter(torch.full((channels,), init))
+        self.scale = mx.full((channels,), init)
 
-    def forward(self, x: torch.Tensor):
+    def __call__(self, x: mx.array):
         return self.scale * x

@@ -3,17 +3,15 @@ import logging
 import time
 from pathlib import Path
 
+import mlx.core as mx
+import numpy as np
 import requests
-import safetensors.torch
-import torch
 from huggingface_hub import hf_hub_download
-from torch import nn
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 _voices_names = ["alba", "marius", "javert", "jean", "fantine", "cosette", "eponine", "azelma"]
 PREDEFINED_VOICES = {
-    # don't forget to change this
     x: f"hf://kyutai/pocket-tts-without-voice-cloning/embeddings_v2/{x}.safetensors@2578fed2380333b621689eaed6fe144cf69dfeb3"
     for x in _voices_names
 }
@@ -25,21 +23,13 @@ def make_cache_directory() -> Path:
     return cache_dir
 
 
-def print_nb_parameters(model: nn.Module, model_name: str):
-    logger = logging.getLogger(__name__)
-    state_dict = model.state_dict()
-    total = 0
-    for key, value in state_dict.items():
-        logger.info("%s: %,d", key, value.numel())
-        total += value.numel()
-    logger.info("Total number of parameters in %s: %,d", model_name, total)
-
-
 def size_of_dict(state_dict: dict) -> int:
     total_size = 0
     for value in state_dict.values():
-        if isinstance(value, torch.Tensor):
-            total_size += value.numel() * value.element_size()
+        if isinstance(value, mx.array):
+            total_size += value.size * value.dtype.size
+        elif isinstance(value, np.ndarray):
+            total_size += value.nbytes
         elif isinstance(value, dict):
             total_size += size_of_dict(value)
     return total_size
@@ -62,7 +52,7 @@ class display_execution_time:
         self.elapsed_time_ms = int((end_time - self.start_time) * 1000)
         if self.print_output:
             self.logger.info("%s took %d ms", self.task_name, self.elapsed_time_ms)
-        return False  # Don't suppress exceptions
+        return False
 
 
 def download_if_necessary(file_path: str) -> Path:
@@ -92,12 +82,12 @@ def download_if_necessary(file_path: str) -> Path:
         return Path(file_path)
 
 
-def load_predefined_voice(voice_name: str) -> torch.Tensor:
+def load_predefined_voice(voice_name: str) -> mx.array:
     if voice_name not in PREDEFINED_VOICES:
         raise ValueError(
             f"Predefined voice '{voice_name}' not found"
             f", available voices are {list(PREDEFINED_VOICES)}."
         )
     voice_file = download_if_necessary(PREDEFINED_VOICES[voice_name])
-    # There is only one tensor in the file.
-    return safetensors.torch.load_file(voice_file)["audio_prompt"]
+    tensors = mx.load(str(voice_file))
+    return tensors["audio_prompt"]

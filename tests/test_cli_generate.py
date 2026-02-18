@@ -130,7 +130,7 @@ def test_generate_default_text(tmp_path):
 
 def test_generate_long_text(tmp_path):
     """Test generate command with longer text."""
-    long_text = "This is a longer text to test the TTS system. " * 5
+    long_text = "This is a longer text to test the TTS system. " * 8
     output_file = tmp_path / "long_text_test.wav"
 
     result = runner.invoke(
@@ -144,8 +144,8 @@ def test_generate_long_text(tmp_path):
     assert audio.shape[0] == 1  # Mono channel
     assert audio.shape[1] > 0  # Has audio samples
     assert sample_rate == 24000
-    # Longer text should produce longer audio
-    assert audio.shape[1] > 24000 * 10  # At least 10 second of audio
+    # Longer text should produce longer audio (8 repetitions at ~2s each)
+    assert audio.shape[1] > 24000 * 10  # At least 10 seconds of audio
 
 
 def test_generate_multiple_runs(tmp_path):

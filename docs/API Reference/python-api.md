@@ -26,7 +26,7 @@ voice_state = tts_model.get_state_for_audio_prompt(
 audio = tts_model.generate_audio(voice_state, "Hello world, this is a test.")
 
 # Save to file
-scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())
+scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio)
 ```
 
 ## Core Classes
@@ -64,18 +64,6 @@ model = TTSModel.load_model(variant="b6369a24", temp=0.5, lsd_decode_steps=5, eo
 
 #### Properties
 
-##### `device` (str)
-
-Returns the device type where the model is running ("cpu" or "cuda").
-By default, the model runs on CPU.
-
-```python
-from pocket_tts import TTSModel
-
-model = TTSModel.load_model()
-print(f"Model running on: {model.device}")
-```
-
 ##### `sample_rate` (int)
 
 Returns the generated audio sample rate (typically 24000 Hz).
@@ -94,7 +82,7 @@ print(f"Sample rate: {model.sample_rate} Hz")
 Extract model state for a given audio file or URL (voice cloning), or load from a .safetensors file.
 
 **Parameters:**
-- `audio_conditioning` (Path | str | torch.Tensor): Audio or .safetensors file path, URL, or tensor
+- `audio_conditioning` (Path | str): Audio or .safetensors file path, URL, or voice name
 - `truncate` (bool): Whether to truncate the audio (default: False)
 
 **Returns:**
@@ -121,7 +109,7 @@ voice_state = model.get_state_for_audio_prompt(
 )
 ```
 
-##### `generate_audio(model_state, text_to_generate, frames_after_eos=None, copy_state=True)`
+##### `generate_audio(model_state, text_to_generate, frames_after_eos=None, copy_state=True, seed=None)`
 
 Generate complete audio tensor from text input.
 
@@ -130,9 +118,10 @@ Generate complete audio tensor from text input.
 - `text_to_generate` (str): Text to convert to speech
 - `frames_after_eos` (int | None): Frames to generate after EOS detection (default: None)
 - `copy_state` (bool): Whether to copy the state (default: True)
+- `seed` (int | None): Random seed for reproducible generation. Same seed + same parameters = bit-identical output (default: None)
 
 **Returns:**
-- `torch.Tensor`: Audio 1D tensor with shape [samples]
+- `numpy.ndarray`: Audio 1D array with shape [samples]
 
 **Example:**
 ```python
@@ -147,16 +136,21 @@ audio = model.generate_audio(voice_state, "Hello world!", frames_after_eos=2, co
 
 print(f"Generated audio shape: {audio.shape}")
 print(f"Audio duration: {audio.shape[-1] / model.sample_rate:.2f} seconds")
+
+# Reproducible generation — same seed produces identical output every time
+audio_a = model.generate_audio(voice_state, "Hello world!", seed=42)
+audio_b = model.generate_audio(voice_state, "Hello world!", seed=42)
+assert np.array_equal(audio_a, audio_b)  # True
 ```
 
-##### `generate_audio_stream(model_state, text_to_generate, frames_after_eos=None, copy_state=True)`
+##### `generate_audio_stream(model_state, text_to_generate, frames_after_eos=None, copy_state=True, seed=None)`
 
 Generate audio streaming chunks from text input.
 
 **Parameters:** Same as `generate_audio()`
 
 **Yields:**
-- `torch.Tensor`: Audio chunks with shape [samples]
+- `numpy.ndarray`: Audio chunks with shape [samples]
 
 **Example:**
 ```python
@@ -198,7 +192,7 @@ model_state_for_voice = model.get_state_for_audio_prompt(
 # Export to safetensors for fast loading later
 export_model_state(model_state_for_voice, "my_voice.safetensors")
 
-# Quite fast, it's just loading the tensors without running any pytorch code
+# Quite fast, it's just loading the tensors without running any model code
 model_state_for_voice_copy = model.get_state_for_audio_prompt("my_voice.safetensors")
 ```
 
@@ -230,7 +224,7 @@ funny_audio = model.generate_audio(voices["funny"], "Good morning.")
 ```python
 from pocket_tts import TTSModel
 import scipy.io.wavfile
-import torch
+import numpy as np
 
 model = TTSModel.load_model()
 
@@ -248,8 +242,8 @@ for text in texts:
     audios.append(audio)
 
 # Concatenate all audio
-full_audio = torch.cat(audios, dim=0)
-scipy.io.wavfile.write("batch_output.wav", model.sample_rate, full_audio.numpy())
+full_audio = np.concatenate(audios)
+scipy.io.wavfile.write("batch_output.wav", model.sample_rate, full_audio)
 ```
 
 ### Streaming to File

@@ -1,15 +1,14 @@
 [project]
-name = "pocket-tts"
+name = "pocket-voice"
 requires-python = ">= 3.10,<3.15"
-description = "Kyutai's pocket-sized text-to-speech!"
-version = "1.1.1"
+description = "Real-time voice AI on Apple Silicon. Native C/Rust pipeline: Mic → STT → LLM → TTS → Speaker."
+version = "3.0.0"
 readme = "README.md"
 dependencies = [
     "numpy>=2",
-    # I tried 2.4.0 but the generated audio is wrong, so 2.5+ is needed.
-    "torch>=2.5.0",
+    "mlx>=0.30.0",
     "pydantic>=2",
-    "sentencepiece>=0.2.1",
+    "sentencepiece>=0.2.0",
     "beartype>=0.22.5",
     "safetensors>=0.4.0",
     "typer>=0.10.0",
@@ -18,13 +17,17 @@ dependencies = [
     "uvicorn>=0.13.0",
     "python-multipart>=0.0.21",
     "scipy>=1.5.0",
-    "einops>=0.4.0",
     "huggingface_hub>=0.10",
     "requests>=2.20.0",
 ]
 
 [project.optional-dependencies]
 audio = ["soundfile>=0.12.0"]
+voice = [
+    "sounddevice>=0.5.0",
+    "claude-agent-sdk>=0.1.37",
+    "moshi>=0.2.9",
+]
 
 
 [dependency-groups]
@@ -40,23 +43,12 @@ dev = [
     "soundfile",
 ]
 
-
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu" },
-]
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
 [tool.ruff]
 line-length = 100
 
 [tool.ruff.format]
 line-ending = "lf"
-# avoid having a trailing comma changing 
+# avoid having a trailing comma changing
 # the behavior of the formatter
 skip-magic-trailing-comma = true
 
@@ -68,7 +60,8 @@ build-backend = "hatchling.build"
 packages = ["pocket_tts"]
 
 [project.scripts]
-pocket-tts = "pocket_tts.main:cli_app"
+pocket-voice = "pocket_tts.main:cli_app"
+pocket-tts = "pocket_tts.main:cli_app"  # Backwards-compatible alias
 
 [tool.uv]
 # System python distribution can have header files missing, so we use only the python

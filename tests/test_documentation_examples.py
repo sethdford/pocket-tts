@@ -4,7 +4,7 @@
 import pytest
 
 
-def test_readme_example():
+def test_readme_example(tmp_path):
     import scipy.io.wavfile
 
     from pocket_tts import TTSModel
@@ -12,11 +12,11 @@ def test_readme_example():
     tts_model = TTSModel.load_model()
     voice_state = tts_model.get_state_for_audio_prompt("cosette")
     audio = tts_model.generate_audio(voice_state, "Hello world, this is a test.")
-    # Audio is a torch tensor containing PCM data.
-    scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())
+    # Audio is a numpy array containing PCM data.
+    scipy.io.wavfile.write(str(tmp_path / "output.wav"), tts_model.sample_rate, audio)
 
 
-def test_quick_start():
+def test_quick_start(tmp_path):
     import scipy.io.wavfile
 
     from pocket_tts import TTSModel
@@ -31,7 +31,7 @@ def test_quick_start():
     audio = tts_model.generate_audio(voice_state, "Hello world, this is a test.")
 
     # Save to file
-    scipy.io.wavfile.write("output.wav", tts_model.sample_rate, audio.numpy())
+    scipy.io.wavfile.write(str(tmp_path / "output.wav"), tts_model.sample_rate, audio)
 
 
 def test_load_model():
@@ -59,17 +59,18 @@ def test_sample_rate():
 
 
 @pytest.fixture
-def make_my_voice_file():
+def make_my_voice_file(tmp_path):
     import requests
 
     url = "https://huggingface.co/kyutai/tts-voices/resolve/main/expresso/ex01-ex02_default_001_channel1_168s.wav"
     response = requests.get(url)
-    with open("my_voice.wav", "wb") as f:
+    voice_file = tmp_path / "my_voice.wav"
+    with open(voice_file, "wb") as f:
         f.write(response.content)
+    return voice_file
 
 
-@pytest.mark.usefixtures("make_my_voice_file")
-def test_get_state_for_audio_prompt():
+def test_get_state_for_audio_prompt(make_my_voice_file):
     from pocket_tts import TTSModel
 
     model = TTSModel.load_model()
@@ -82,7 +83,7 @@ def test_get_state_for_audio_prompt():
     )
 
     # From local file
-    voice_state = model.get_state_for_audio_prompt("./my_voice.wav")
+    voice_state = model.get_state_for_audio_prompt(str(make_my_voice_file))
 
     # From HTTP URL
     voice_state = model.get_state_for_audio_prompt(
@@ -133,9 +134,9 @@ def test_voice_management():
     funny_audio = model.generate_audio(voices["serious"], "Good morning.")
 
 
-def test_batch_processing():
+def test_batch_processing(tmp_path):
+    import numpy as np
     import scipy.io.wavfile
-    import torch
 
     from pocket_tts import TTSModel
 
@@ -155,5 +156,5 @@ def test_batch_processing():
         audios.append(audio)
 
     # Concatenate all audio
-    full_audio = torch.cat(audios, dim=0)
-    scipy.io.wavfile.write("batch_output.wav", model.sample_rate, full_audio.numpy())
+    full_audio = np.concatenate(audios, axis=0)
+    scipy.io.wavfile.write(str(tmp_path / "batch_output.wav"), model.sample_rate, full_audio)

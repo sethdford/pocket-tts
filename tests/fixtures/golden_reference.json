@@ -1,0 +1,9 @@
+{
+  "seed": 42,
+  "voice": "alba",
+  "text": "The quick brown fox jumps over the lazy dog.",
+  "sample_rate": 24000,
+  "num_samples": 111360,
+  "duration_seconds": 4.64,
+  "checksum_sha256": "b75d481e8b71cc43a537e1c0f511cbf22ce922322ab885f4088762b10dc91d85"
+}

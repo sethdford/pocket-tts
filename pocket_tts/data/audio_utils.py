@@ -1,28 +1,31 @@
 """Various utilities for audio conversion (pcm format, sample rate and channels),
 and volume normalization."""
 
-import torch
+import math
+
+import numpy as np
 from scipy.signal import resample_poly
 
 
 def convert_audio(
-    wav: torch.Tensor, from_rate: int | float, to_rate: int | float, to_channels: int
-) -> torch.Tensor:
-    """Convert audio to new sample rate and number of audio channels."""
-    if from_rate != to_rate:
-        # Convert to numpy for scipy resampling
-        wav_np = wav.detach().cpu().numpy()
+    wav: np.ndarray, from_rate: int | float, to_rate: int | float, to_channels: int
+) -> np.ndarray:
+    """Convert audio to new sample rate and number of audio channels.
 
-        # Calculate resampling parameters
-        gcd = int(torch.gcd(torch.tensor(from_rate), torch.tensor(to_rate)).item())
+    Args:
+        wav: Audio array of shape [channels, samples].
+        from_rate: Source sample rate.
+        to_rate: Target sample rate.
+        to_channels: Target number of channels.
+
+    Returns:
+        Resampled audio array.
+    """
+    if from_rate != to_rate:
+        gcd = math.gcd(int(from_rate), int(to_rate))
         up = int(to_rate // gcd)
         down = int(from_rate // gcd)
-
-        # Resample using scipy
-        resampled_np = resample_poly(wav_np, up, down, axis=-1)
-
-        # Convert back to torch tensor
-        wav = torch.from_numpy(resampled_np).to(wav.device).to(wav.dtype)
+        wav = resample_poly(wav, up, down, axis=-1).astype(np.float32)
 
     assert wav.shape[-2] == to_channels
     return wav

@@ -1,0 +1,125 @@
+{
+  "sample_rate": 24000,
+  "samples": [
+    {
+      "filename": "alba_100.wav",
+      "voice": "alba",
+      "seed": 100,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 161280,
+      "duration_seconds": 6.72,
+      "rms_amplitude": 0.16958,
+      "checksum_sha256": "4362b6dae64f605808045f662e7eba2ea802e1c3b1ae9bc40abae76e85df9db9"
+    },
+    {
+      "filename": "marius_101.wav",
+      "voice": "marius",
+      "seed": 101,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 151680,
+      "duration_seconds": 6.32,
+      "rms_amplitude": 0.210773,
+      "checksum_sha256": "5e4f2d89d44ff277aa11d10269963285049051ef0d59933019b99ba7c66e5d65"
+    },
+    {
+      "filename": "javert_102.wav",
+      "voice": "javert",
+      "seed": 102,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 161280,
+      "duration_seconds": 6.72,
+      "rms_amplitude": 0.185181,
+      "checksum_sha256": "198a6bd02723d8b6db8312c2129a888ca6fb98b7df5dd293cc01ed3ebc73122b"
+    },
+    {
+      "filename": "jean_103.wav",
+      "voice": "jean",
+      "seed": 103,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 153600,
+      "duration_seconds": 6.4,
+      "rms_amplitude": 0.174109,
+      "checksum_sha256": "6779d0038447f9dabdfec22d2405f92da040d34e6414c0601ce52125d98f3837"
+    },
+    {
+      "filename": "fantine_104.wav",
+      "voice": "fantine",
+      "seed": 104,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 161280,
+      "duration_seconds": 6.72,
+      "rms_amplitude": 0.19411,
+      "checksum_sha256": "9d62266051785bb01c66bc2d2803ec7c44232a1d30823b297d95a144ff6dd026"
+    },
+    {
+      "filename": "cosette_105.wav",
+      "voice": "cosette",
+      "seed": 105,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 142080,
+      "duration_seconds": 5.92,
+      "rms_amplitude": 0.211631,
+      "checksum_sha256": "fbd05e1c9c5938ed9d3344d3c6cba1091d16153def0ea341f10cd25d967633b7"
+    },
+    {
+      "filename": "eponine_106.wav",
+      "voice": "eponine",
+      "seed": 106,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 159360,
+      "duration_seconds": 6.64,
+      "rms_amplitude": 0.153759,
+      "checksum_sha256": "100ea555950f346a715ca347d2b0c7d4f2e4fbb107f7fcbadcc0075520dd65b8"
+    },
+    {
+      "filename": "azelma_107.wav",
+      "voice": "azelma",
+      "seed": 107,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "num_samples": 161280,
+      "duration_seconds": 6.72,
+      "rms_amplitude": 0.211927,
+      "checksum_sha256": "cee62cc915ece8dfd421a5f782bcf8f2e8c547c45d4c1b1bd70ebe1f205073e8"
+    },
+    {
+      "filename": "alba_200.wav",
+      "voice": "alba",
+      "seed": 200,
+      "text": "She sells seashells by the seashore.",
+      "num_samples": 144000,
+      "duration_seconds": 6.0,
+      "rms_amplitude": 0.214923,
+      "checksum_sha256": "579c909e15bad419a87a6f7d7ef12c7acfb39706161038e6074ad12b30cb63ca"
+    },
+    {
+      "filename": "alba_201.wav",
+      "voice": "alba",
+      "seed": 201,
+      "text": "How much wood would a woodchuck chuck if a woodchuck could chuck wood?",
+      "num_samples": 113280,
+      "duration_seconds": 4.72,
+      "rms_amplitude": 0.20888,
+      "checksum_sha256": "5def2681d6e5064660262260c6bb37b3b73796d030770d35d8c4374abd208ecd"
+    },
+    {
+      "filename": "marius_202.wav",
+      "voice": "marius",
+      "seed": 202,
+      "text": "To be or not to be, that is the question.",
+      "num_samples": 117120,
+      "duration_seconds": 4.88,
+      "rms_amplitude": 0.165568,
+      "checksum_sha256": "ee60b1d18efa00841d08397198b516bedec9f1df623ffca3bdfa25b511eee627"
+    },
+    {
+      "filename": "jean_203.wav",
+      "voice": "jean",
+      "seed": 203,
+      "text": "I have a dream that one day this nation will rise up and live out the true meaning of its creed.",
+      "num_samples": 220800,
+      "duration_seconds": 9.2,
+      "rms_amplitude": 0.098215,
+      "checksum_sha256": "e7b4f9b4aaa81b3d3815f316c1ac3c9876778ef3ef1eb36ad54d63b94b783c66"
+    }
+  ]
+}

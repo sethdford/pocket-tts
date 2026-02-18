@@ -12,8 +12,10 @@ from pocket_tts.models.tts_model import (  # noqa: E402
 # TTSModel.device
 # TTSModel.sample_rate
 # TTSModel.load_model
+# TTSModel.load_model(quantize=4)  -- 4-bit quantization
 # TTSModel.generate_audio
 # TTSModel.generate_audio_stream
 # TTSModel.get_state_for_audio_prompt
+# TTSModel.list_voices
 
 __all__ = ["TTSModel", "export_model_state"]

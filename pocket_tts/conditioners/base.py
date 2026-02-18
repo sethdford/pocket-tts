@@ -1,17 +1,17 @@
 import logging
 from typing import Generic, NamedTuple, TypeVar
 
-import torch
-from torch import nn
+import mlx.core as mx
+import mlx.nn as nn
 
 logger = logging.getLogger(__name__)
 
 
-Prepared = TypeVar("Prepared")  # represents the prepared condition input type.
+Prepared = TypeVar("Prepared")
 
 
 class TokenizedText(NamedTuple):
-    tokens: torch.Tensor  # should be long tensor.
+    tokens: mx.array  # should be int32 tensor.
 
 
 class BaseConditioner(nn.Module, Generic[Prepared]):
@@ -34,5 +34,5 @@ class BaseConditioner(nn.Module, Generic[Prepared]):
         assert force_linear or dim != output_dim
         assert not output_bias
 
-    def forward(self, inputs: TokenizedText) -> torch.Tensor:
+    def __call__(self, inputs: TokenizedText) -> mx.array:
         return self._get_condition(inputs)

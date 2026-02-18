@@ -1,74 +1,54 @@
-import math
-
-import torch
-from torch import nn
-
-
-def apply_rope(
-    q: torch.Tensor,
-    k: torch.Tensor,
-    offset: int | torch.Tensor = 0,
-    max_period: int | float = 10_000,
-):
-    """
-    Args:
-        q (torch.Tensor): Queries, shape `[B, T, H, D]`.
-        k (torch.Tensor): Keys, shape `[B, T, H, D]`.
-        offset (int): Current offset, e.g. when streaming.
-        max_period (float): Maximum period for the cos and sin.
-    """
-
-    B, T, H, D = q.shape
-    Bk, Tk, Hk, Dk = k.shape
-    assert (B, T, D) == (Bk, Tk, Dk)
-    assert D > 0
-    assert D % 2 == 0
-    assert max_period > 0
-
-    ds = torch.arange(D // 2, device=q.device, dtype=torch.float32)
-    freqs = torch.exp(ds * (-math.log(max_period) * 2 / D))
-
-    # could be optimized in one call
-    ts = torch.arange(T, device=q.device, dtype=torch.float32)
-    ts += offset
-    ts = ts.view(-1, 1, 1)
-
-    q = q.view(B, T, H, D // 2, 2)
-    k = k.view(B, T, Hk, D // 2, 2)
-
-    # convention is `r` suffix is real part, `i` is imaginary.
-    qr = q[..., 0].float()
-    qi = q[..., 1].float()
-
-    kr = k[..., 0].float()
-    ki = k[..., 1].float()
-
-    rotr = torch.cos(freqs * ts)
-    roti = torch.sin(freqs * ts)
-    qor = qr * rotr - qi * roti
-    qoi = qr * roti + qi * rotr
-
-    kor = kr * rotr - ki * roti
-    koi = kr * roti + ki * rotr
-
-    dtype = q.dtype
-    qo = torch.stack([qor.to(dtype), qoi.to(dtype)], dim=-1)
-    ko = torch.stack([kor.to(dtype), koi.to(dtype)], dim=-1)
-
-    return qo.view(B, T, H, D), ko.view(B, T, Hk, D)
+import mlx.core as mx
+import mlx.nn as nn
 
 
 class RotaryEmbedding(nn.Module):
-    """Rotary positional embedding (RoPE) from [Su et al 2022](https://arxiv.org/abs/2104.09864).
+    """Rotary positional embedding using mx.fast.rope fused Metal kernel.
+
+    For T=1 generation, uses a batched strategy to apply RoPE to both Q and K
+    in a single kernel dispatch (halving the number of RoPE kernel launches).
 
     Args:
-        max_period (float): Maximum period of the rotation frequencies.
+        max_period (float): Maximum period of the rotation frequencies (base).
     """
 
     def __init__(self, max_period: float | int = 10000.0):
         super().__init__()
-        self.max_period = max_period
+        self.max_period = float(max_period)
 
-    def forward(self, q: torch.Tensor, k: torch.Tensor, offset: torch.Tensor | int):
-        """Apply rope rotation to query or key tensor."""
-        return apply_rope(q, k, offset, self.max_period)
+    def __call__(self, q: mx.array, k: mx.array, offset: mx.array | int):
+        """Apply RoPE to query and key tensors.
+
+        Args:
+            q: shape (B, H, T, D) - already transposed for attention
+            k: shape (B, H, T, D)
+            offset: position offset for streaming
+        """
+        D = q.shape[-1]
+        B = q.shape[0]
+        T = q.shape[2]
+
+        if T == 1 and B == 1:
+            # Fused dual RoPE: stack Q and K along batch dim, apply once, split
+            # Reduces 2 kernel dispatches to 1 for the common generation case
+            qk = mx.concatenate([q, k], axis=0)  # (2, H, 1, D)
+            # Broadcast offset for both Q and K (same position)
+            if isinstance(offset, mx.array) and offset.ndim == 0:
+                dual_offset = mx.broadcast_to(offset, (2,))
+            elif isinstance(offset, mx.array):
+                dual_offset = mx.concatenate([offset, offset], axis=0)
+            else:
+                dual_offset = offset
+            qk = mx.fast.rope(
+                qk, D, traditional=True, base=self.max_period, scale=1.0, offset=dual_offset
+            )
+            q = qk[:1]
+            k = qk[1:]
+        else:
+            q = mx.fast.rope(
+                q, D, traditional=True, base=self.max_period, scale=1.0, offset=offset
+            )
+            k = mx.fast.rope(
+                k, D, traditional=True, base=self.max_period, scale=1.0, offset=offset
+            )
+        return q, k

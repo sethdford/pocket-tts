@@ -1,5 +1,5 @@
-import torch
-from torch import nn
+import mlx.core as mx
+import mlx.nn as nn
 
 from pocket_tts.modules.conv import StreamingConv1d, StreamingConvTranspose1d
 
@@ -17,12 +17,11 @@ class ConvDownsample1d(nn.Module):
             dimension,
             kernel_size=2 * stride,
             stride=stride,
-            groups=1,
             bias=False,
             pad_mode="replicate",
         )
 
-    def forward(self, x: torch.Tensor, model_state: dict | None):
+    def __call__(self, x: mx.array, model_state: dict | None):
         return self.conv(x, model_state)
 
 
@@ -42,5 +41,5 @@ class ConvTrUpsample1d(nn.Module):
             bias=False,
         )
 
-    def forward(self, x: torch.Tensor, model_state: dict | None):
+    def __call__(self, x: mx.array, model_state: dict | None):
         return self.convtr(x, model_state)
