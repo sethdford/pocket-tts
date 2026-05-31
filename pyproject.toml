@@ -15,10 +15,10 @@ dependencies = [
     "typing_extensions>=4.0.0",
     "fastapi>=0.100",
     "uvicorn>=0.13.0",
-    "python-multipart>=0.0.21",
+    "python-multipart>=0.0.27",
     "scipy>=1.5.0",
     "huggingface_hub>=0.10",
-    "requests>=2.20.0",
+    "requests>=2.33.0",
 ]
 
 [project.optional-dependencies]
@@ -38,7 +38,7 @@ dev = [
     "mkdocs-autolinks-plugin>=0.7.1",
     "mkdocs-material>=9.7.1",
     "mkdocstrings-python>=2.0.1",
-    "pytest>=9.0.2",
+    "pytest>=9.0.3",
     "pytest-xdist>=3.8.0",
     "soundfile",
 ]
